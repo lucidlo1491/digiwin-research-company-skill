@@ -86,6 +86,10 @@ The gold standard feeds `database/ingest_md_to_db.py` (deterministic parser) →
 
 11. **File placement:** drafts are written to `docs/_eval/gold-standard-<id>.md.draft` and only `mv`-promoted to `docs/gold-standard-<id>.md` after ALL gates pass — a glob-matching filename is auto-committed to the DB by the nightly launchd job whether gated or not. Backups/eval copies must never match the `docs/gold-standard-*.md` glob (use `docs/_eval/archive/` or `*.md.bkp`).
 
+## CASE CURRENCY — a case page proves the past, not the present (added 2026-09-08, the 台虹 burn)
+
+A `digiwin.com.tw/case/<n>` page is evidence that the company implemented that product **at the page's date**. It is NOT evidence of what they run today: 台虹 Taiflex had a 2018 TIPTOP + APS case page and has run SAP as its core ERP since ~2019–2020 (its own 2021–2025 job postings). The dossier and the first-visit deck both carried "your supplier schedules on our system" in the present tense until Peter caught it. Before any Taiwanese case is written in the present tense (on a slide, in a 話術, in the 六要素): (1) check the company's CURRENT job postings — SAP ABAP / SD-MM / S/4 hires mean they left, TIPTOP / Genero 4GL / T100 hires mean they stayed; (2) if the page is older than ~3 years and postings are silent, ask NOVA live for currency and, for a slide, the DigiWin TW AM whether the maintenance contract is still paid; (3) write the case page's DATE next to the name in the dossier's case-verification block. A case with unknown currency may be spoken as history ("implemented our APS in 2018"), never as a present-tense reference.
+
 ## Step 0.5: PRIOR CONTACT PROBE — run BEFORE any searching (added 2026-08-31)
 
 ```
@@ -399,6 +403,30 @@ Output → `## Warm Base & Nearby References` (3–5 lines, each tagged 【DB】
 - Signed customers may be named ONLY if reference-approved; otherwise "a DigiWin client 2km away (reference approval TBC)".
 - Tag every hit `direct|distributor` — never blend the two books.
 - MySQL down → write `> Warm base: DB unavailable — skipped` and continue (never fail the run).
+
+## Step 2.6: REFERENCE SWEEP — every DigiWin customer in his industry (MANDATORY, both tiers; added 2026-09-24)
+
+```
+python3 tools/reference_sweep.py <company-id> --terms "<industry terms: zh, zh-simplified, en — e.g. 不織布,不织布,熔噴,紡粘,nonwoven,spunbond>"
+```
+
+**Why:** a 2026-09 nonwoven research run searched only MySQL and the Monk slide corpus, wrote "genuine white space — no nonwoven
+anywhere", and the deck told the customer "we have not done a nonwoven plant". DigiWin TW's published case library,
+mirrored locally, held THREE nonwoven manufacturers (three nonwoven manufacturers) and the Monk had one of them on a logo wall.
+Two negative sources are not absence. The sweep searches the TW cases, blog and solution pages, the Monk cards (by
+industry term AND by every case company's name), and the RAG, and writes
+`docs/research-fragments/<id>/reference-sweep.md` ending in `SWEEP-VERDICT: FOUND n | NONE | INCOMPLETE`.
+
+**Rules:**
+- **No "no reference / white space / 沒有案例" sentence anywhere** (dossier, deck, notes, NOVA packet) unless the
+  verdict is `NONE`. `INCOMPLETE` (a source errored) is not NONE — fix and re-run.
+- Choose terms like a customer would name his industry, in zh-TW, zh-CN and EN (the mirror is zh-TW). Company names
+  are not terms — the sweep's name pass finds them.
+- Carry FOUND cases into the dossier as a `### DigiWin References in This Industry` table inside `## Warm Base &
+  Reference Angle` (its internal fence — a new `##` section would break the six-fence contract): case id,
+  company, page DATE, what was implemented, the measured result. A case page proves the past
+  ([[feedback_case_currency_not_case_page]]) — history with its year, never present tense, until checked.
+- The first-visit deck's `check_inputs.py` FAILS without the sweep file.
 
 ## Step 3: Enrichment — QUICK tier (default)
 
