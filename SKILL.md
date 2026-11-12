@@ -1,13 +1,7 @@
 ---
 name: digiwin-research-company
-description: >
-  Use when investigating a prospective or unknown manufacturing company before a
-  sales meeting, or adding one to the pipeline. Triggers: "research [company]",
-  "look up / who is [company]", "prep for the meeting with [company]", "company
-  intel on [company]", "design doc for [company]", "deep research [company]" or
-  "--deep" (deep tier), a fresh name card, or any unfamiliar company in the
-  leads sheet / Drive Inbox that needs DBD registry + deep-website investigation
-  before a sales call.
+description: >-
+  Use when investigating a prospective or unknown manufacturing company before a sales meeting, or adding one to the pipeline. Triggers: "research [company]", "who is [company]", "prep for the meeting with [company]", "company intel on [company]", "deep research [company]" or "--deep", a fresh name card, or an unfamiliar company in the leads sheet / Drive Inbox needing DBD registry and deep-website investigation.
 ---
 
 # /digiwin-research-company (v4)
@@ -23,8 +17,9 @@ Companion files (in **this skill's directory**, `~/.claude/skills/digiwin-resear
 - `dbd-checklist.md` — mandatory DBD DataWarehouse extraction steps (Phases A–F; Phase G in deep tier)
 - `briefing-template.md` — output formats (A operating / B greenfield / C SPV-unresolved; partner Template D retired → /research-partner) + the canonical 六要素 table
 - `scripts/check_contract.py` — the REQUIRED output-contract checker (Gate mechanization)
-- `nova-knowledge.md` — DigiWin institutional priors elicited from the NOVA agent (entry wedges, incumbent base rates, ROI benchmarks, qualification gates/red-flag formulas, trigger rankings, family-firm authority playbook). READ at Step 5; priors sharpen hypotheses and deal structure but NEVER substitute for evidence — tag reliance 【推論 calibrated by NOVA KB <date>】 and keep it inside internal fences.
-- `nova-live-consultation.md` — **MANDATORY in-loop procedure: ask the LIVE NOVA agent (Playwright/Teams) whenever a judgment call cannot be grounded in run-evidence or the cached KB** (Peter, 2026-07-17: "ask NOVA whenever you have questions, ask where you need to, so you are undoubtedly confident"). The cached `nova-knowledge.md` is priors; the queue is for later; this is real-time. Read at Step 4/5 and consult AS the residual questions surface. Tag answers 【NOVA live <date>】 inside internal fences; encode durable priors back into `nova-knowledge.md`.
+- `china-sources.md` — **REQUIRED READ when any director is Chinese/Taiwanese or DBD shows foreign (non-Thai) nationality**: how to find and prove the overseas parent (Baidu via Chrome, what is geo-blocked, director-pair search, Wayback for dead parent sites), the hand-off to the arms, and the off-mandate flag. Added 2026-10-27 (Jinjiale: US WebSearch found nothing in 30+ queries; Baidu found the parent on query 2).
+- `nova-knowledge.md` — DigiWin institutional priors elicited from the NOVA agent (entry wedges, incumbent base rates, ROI benchmarks, qualification gates/red-flag formulas, trigger rankings, family-firm authority playbook). READ at Step 5; priors sharpen hypotheses and deal structure but never substitute for evidence — tag reliance 【推論 calibrated by NOVA KB <date>】 and keep it inside internal fences.
+- `nova-live-consultation.md` — **mandatory in-loop procedure: ask the LIVE NOVA agent (Playwright/Teams) whenever a judgment call cannot be grounded in run-evidence or the cached KB** (Peter, 2026-07-17: "ask NOVA whenever you have questions, ask where you need to, so you are undoubtedly confident"). The cached `nova-knowledge.md` is priors; the queue is for later; this is real-time. Read at Step 4/5 and consult AS the residual questions surface. Tag answers 【NOVA live <date>】 inside internal fences; encode durable priors back into `nova-knowledge.md`.
 
 **Environment:** assumes cwd = `/Users/peterlo/digiwin_automation` (repo root) — `docs/`, `database/`, `docs/token-ledger.csv` are repo-relative. **MySQL must be up even for the Gate-#13 dry-run** (`~/.my.cnf`); if it's down, the run can complete but the dossier CANNOT be promoted (Gate #13 INCONCLUSIVE).
 
@@ -45,11 +40,11 @@ The gold standard feeds `database/ingest_md_to_db.py` (deterministic parser) →
 
 1. **Required headings, verbatim (never rename):** `## Directors` · `## Key People` · `## Ownership …` · `## Technology & Systems` · `## What They Make` (or `## Products …`) · `## Certifications …` · `## Sources` (or `All Sources`). Row labels the parser matches: Tax ID / Legal name (TH/EN) / Website / Facebook / Company type / Signing authority.
 2. **FORBIDDEN headings at any level ##–####:** any heading beginning `Entity N`, `Primary target`, `Secondary target`, or `Sibling` — the parser SPLITS the file on these, discards everything before the first match, and mints bogus company rows. Group members are always TABLE ROWS, never headings.
-3. **Inference NEVER as rows inside ingested sections.** `## Technology & Systems` = ONE table, only evidence-backed named systems (confidence High/Medium, dated evidence). No-signal is a **blockquote line under the table**, never a row (a row is only acceptable if the vendor cell literally starts with `Unknown`). Verdicts/EOL-hints are prose in the non-ingested `## ERP Incumbent Read 【推論】` section.
+3. **Inference never as rows inside ingested sections.** `## Technology & Systems` = ONE table, only evidence-backed named systems (confidence High/Medium, dated evidence). No-signal is a **blockquote line under the table**, never a row (a row is only acceptable if the vendor cell literally starts with `Unknown`). Verdicts/EOL-hints are prose in the non-ingested `## ERP Incumbent Read 【推論】` section.
 4. **Key People = prose paragraphs ONLY. Never pipe tables, never bullet lists.** (KP tables ingest as registry *directors* unconditionally — the exact corruption the authority-check exists to prevent.) When DBD directors are paywalled, write the prose line `Directors: PENDING (paywalled)`.
-5. **`## Directors`:** the directors table is the FIRST table in its section. Extra columns (e.g. "Other directorships") are safe. **Keep the labelled line `Signing authority: <name(s)>`** — a Signing column is invisible to the parser. Sibling/candidate tax-ids never appear in a row whose first cell matches `Tax ID / Juristic ID / เลขทะเบียน` — and NEVER write `Tax ID (current)` for anything but the primary entity.
+5. **`## Directors`:** the directors table is the FIRST table in its section. Extra columns (e.g. "Other directorships") are safe. **Keep the labelled line `Signing authority: <name(s)>`** — a Signing column is invisible to the parser. Sibling/candidate tax-ids never appear in a row whose first cell matches `Tax ID / Juristic ID / เลขทะเบียน` — and never write `Tax ID (current)` for anything but the primary entity.
 6. **New-table first-column discipline:** col-1 text must never match the parser's whole-file label regexes (`erp\b`, `export\b`, `certification`, `tax id`, `^website`, `facebook`, `company type`). Hence: `## Urgency Signals & Timing Triggers` columns are `| Date | Trigger | Evidence | Source |` (Date first), and system-EOL triggers are written "System EOL — …" (never "ERP …" in any cell that could lead a row).
-7. **When `## Group Structure & Decision Map` exists, the dossier MUST carry an explicit exports line** — either real markets or exactly `Exports: not found` (the parser's exact null token; "none found" would ingest as a region). Otherwise a group-member name containing "Export/Trading" gets scavenged into export_markets (proven).
+7. **When `## Group Structure & Decision Map` exists, the dossier must carry an explicit exports line** — either real markets or exactly `Exports: not found` (the parser's exact null token; "none found" would ingest as a region). Otherwise a group-member name containing "Export/Trading" gets scavenged into export_markets (proven).
 8. **THIRD-PARTY IDENTITY (added 2026-08-31 — the Sun Robotics burn).** EVERY third party named
    anywhere in the dossier — referring partner, distributor, JV entity, supplier, named customer,
    sister company — is resolved to its **13-digit tax ID**, or carries the literal token
@@ -133,7 +128,7 @@ From the company name:
 
 ### Chinese-to-Thai Transliteration Guide (CRITICAL for 華商 companies)
 
-When the input is a Chinese company name, you MUST try **multiple Thai transliterations** because:
+When the input is a Chinese company name, you must try **multiple Thai transliterations** because:
 - Chinese phonemes map to Thai inconsistently
 - Different translators produce different spellings
 - DBD search is exact-match, so one wrong vowel = zero results
@@ -157,7 +152,7 @@ When the input is a Chinese company name, you MUST try **multiple Thai translite
 6. Web search for "[English name] Thailand DBD" or "dataforthai" or "creden.co"
 7. Search by Tax ID or registration number (if found from web)
 
-**NEVER give up after one failed search.** The Sitthinon case needed English name. The NutritionProfess case needed the company website. The Hengli case needed 3 transliteration attempts + web search.
+**Never give up after one failed search.** The Sitthinon case needed English name. The NutritionProfess case needed the company website. The Hengli case needed 3 transliteration attempts + web search.
 
 ## Step 1.5: Partner-Target Detector (route channel candidates to /research-partner)
 
@@ -166,7 +161,7 @@ This skill researches SELL-TO prospects only. Partner/distributor/SI/alliance ca
 - **s3 — roster match**: the name matches the partner roster (locked-7 + SMK + PLIC + A&M + Wecon + 象田 — see `~/.claude/skills/research-partner/partner-extraction-schema.md` §5, or live `companies WHERE channel_role<>'prospect'`) → **hand off outright.**
 - **s2 — TSIC** ∈ wholesale-software / IT-services / consulting (46510, 46104, 62011–62099, 70209) **AND s4 — website self-describes** as SI / integrator / consultant / reseller → **STOP and AskUserQuestion** ("this looks like a channel candidate, not a sell-to — research as partner?"; the COMMIT rule, 2026-07-17).
 - s2 alone (e.g. a trading company) → continue sell-to, note it in the dossier.
-A manufacturing prospect (TSIC 2xxxx–3xxxx, business group ผลิต) NEVER routes to partner unless s1/s3 fire.
+A manufacturing prospect (TSIC 2xxxx–3xxxx, business group ผลิต) never routes to partner unless s1/s3 fire.
 
 ## Step 2: DBD DataWarehouse (FOUNDATION — always do this FIRST)
 
@@ -181,6 +176,10 @@ DBD DataWarehouse (datawarehouse.dbd.go.th) is the **single most valuable source
 4. Type company name in search box, press Enter
 5. If results found → proceed to profile extraction (see dbd-checklist.md)
 6. If NO results → try next name variant from the fallback chain
+
+**With a tax ID, skip the search:** open `https://datawarehouse.dbd.go.th/company/profile/5<13-digit tax id>` (note the `5` prefix; `/profile/5/<id>` is a 404). Tabs ข้อมูลงบการเงิน / งบกำไรขาดทุน / การลงทุนจำแนกตามสัญชาติ / ประวัติการเปลี่ยนแปลง (capital history) all render without login; read the financial tables with JS `[...document.querySelectorAll('table')].map(t=>t.innerText)` after a 2 s wait (page text alone comes back empty on the P&L view).
+
+**If the Playwright MCP browser is held by another session** ("Browser is already in use"): use the Chrome extension (`claude-in-chrome`) for DBD — it worked headed on 2026-10-27 with no WAF block. Do not kill the other session's browser.
 
 **If DBD Playwright fails** (WAF blocks, site bugs, redirects):
 - Try alternative sources for the same data:
@@ -231,6 +230,12 @@ If the company shows:
 - Parent company analysis becomes critical (who's funding this?)
 
 **Examples**: Hengli (250M, metal mfg), Junma (1.625B, tire cord), Zhongli (150M, auto parts) — all greenfield factories in construction/commissioning phase.
+
+#### Misfiled TSIC
+DBD "business group" and "size" are DERIVED from the filed TSIC and revenue, so a misfiled code drags both with it. Jinjiale (2026-10-27) filed 46441 *wholesale of pharmaceutical goods* at registration and in its latest filing, while its objective reads enamel + hardware + iron casting and the news calls it a steel-grate factory. **When the TSIC and the วัตถุประสงค์ disagree, the objective + news + trade data decide the industry; never disqualify or route on the TSIC alone.** Write both in Phase B.
+
+#### Equity larger than registered capital
+If filed equity exceeds the registered capital in force at that year-end (Jinjiale FY2025: equity ฿963M vs registered ฿500M until a 2026-05-20 increase), the gap is most likely share-subscription money received in advance and registered later. Write it as 【推論 from DBD】, and read the later capital increase as the formalisation, not as fresh money.
 
 ### Early Disqualification Gate (immediately after DBD Phase B)
 
@@ -335,6 +340,8 @@ WebSearch: "[Company] Thailand" news OR expansion OR factory OR ขยาย OR 
 ```
 Looking for: new factories, M&A, leadership changes, awards, financial results
 
+**Run the enforcement check here, in the main loop, BEFORE dispatching the arms** (added 2026-10-27). One query on the registered ADDRESS in Thai (`โรงงาน <house no.> หมู่ <n> <ตำบล> <อำเภอ> <จังหวัด>`) plus one on the Thai legal name with `กากอุตสาหกรรม OR สั่งหยุด OR ดำเนินคดี OR ร้องเรียน`. On Jinjiale the address query surfaced the decision-changing fact of the whole run — a Ministry of Industry prosecution and, later, a stop-all-activity order — which D5's negative-news pack would only have reached last. A stop order or prosecution goes into `00-context.md` immediately so every arm and the NOVA question carry it.
+
 ### Search 8: Import/Export Data — US customers & their standards regime (rebuilt 2026-08-11)
 
 **Why this step is worth real effort:** ImportYeti carries **U.S. CBP bills of lading** — a legal
@@ -370,6 +377,12 @@ python3 tools/importyeti_section.py --self-test        # regression (Innovalues 
    "ImportYeti: no data found" with no such qualifier — re-word when next touched.*
 6. Free tier = **U.S. Imports** only. US Exports / MX / Customs Clearance are paid.
 
+7. **Search by the brand token too, not only the Thai legal name** (`?q=jinjiale`): one search
+   returned the Thai entity AND its PRC parent. **A shared contact e-mail domain on the bills of lading
+   (e.g. `jjlenamel.com` on both) is an identity signal** for the parent link — record it in the group
+   map's signal count. For the trend, switch the chart's "Organize bars by" to **Annual** and read the
+   bars (state that values are read off the chart).
+
 Also capture when present: shipment time series + YoY trend (a decline is a live discovery item —
 for INNOVALUES it corroborated the unexplained 2024 revenue drop already in the dossier),
 HS-code product breakdown, and the per-buyer activity sparkline.
@@ -383,13 +396,36 @@ WebSearch: site:pantip.com "[Company Thai Name]"
 WebSearch: "[Company Thai Name]" รีวิว OR ดีไหม OR ประสบการณ์ OR บริการ
 WebSearch: "[Company Thai Name]" ฟ้อง OR คดี OR โกง OR ค้างจ่าย OR ประท้วง OR ไฟไหม้ OR เลิกจ้าง
 ```
-How local people talk about the company: Pantip/forum threads, Facebook page + public group mentions, Google Maps reviews (if agent-side fetch is blocked, pull via main-loop Playwright like DBD), employer reviews (JobsDB/JobThai), TikTok/YouTube, LINE OA presence. **Evidence tier 【公開-社群】 = sentiment-grade, NEVER fact-grade**: reviews and forum claims are perceptions/allegations — write "reviewers allege/say", never restate as established fact; they shape approach and door-openers, not the factual record. PASSIVE ONLY: no login, no posting, no joining groups, no contacting anyone, no minors/personal detail, nothing defamatory ever reaches a customer-facing artifact. B2C-facing companies (consumer brands, retail service) yield rich signal; pure B2B exporters may only yield employer reviews — report absence honestly. Quick tier = this one pass; deep tier expands into Agent D5.
+How local people talk about the company: Pantip/forum threads, Facebook page + public group mentions, Google Maps reviews (if agent-side fetch is blocked, pull via main-loop Playwright like DBD), employer reviews (JobsDB/JobThai), TikTok/YouTube, LINE OA presence. **Evidence tier 【公開-社群】 = sentiment-grade, never fact-grade**: reviews and forum claims are perceptions/allegations — write "reviewers allege/say", never restate as established fact; they shape approach and door-openers, not the factual record. PASSIVE ONLY: no login, no posting, no joining groups, no contacting anyone, no minors/personal detail, nothing defamatory ever reaches a customer-facing artifact. B2C-facing companies (consumer brands, retail service) yield rich signal; pure B2B exporters may only yield employer reviews — report absence honestly. Quick tier = this one pass; deep tier expands into Agent D5.
 
 ### Search 9: BOI Status
 ```
 WebSearch: "[Company]" BOI OR "Board of Investment" OR ส่งเสริมการลงทุน OR promoted
 ```
 Looking for: BOI promotion, investment privileges, zone, tax benefits
+
+## Step 2.3: SITE & MAP CHECK — Google Places API (both tiers; added 2026-11-03)
+
+Right after DBD Phase B, in the main loop:
+```
+python3 tools/maps/places.py check --company-id <id> --name "<legal or brand name>" --address "<DBD registered address>" --province <ไทย province>
+```
+It returns the `## Site & Map Check` section ready to paste into the dossier (place it right after `## Phase B+`), saves the listing's
+public photos to `docs/company-assets/<id>/maps/` (with `manifest.json` credits), and uses ~5–25 Places calls (the tool stops itself
+at 180/day; project quota 200/day; key `GOOGLE_PLACES_API_KEY` in `~/.pipeline/.env`, never printed). What it settles and where it goes:
+1. **Site:** is there a Maps listing at the registered address, is it OPERATIONAL or CLOSED, does the address MATCH (house no. + หมู่)?
+   A CLOSED or mismatched site is an entity anomaly — resolve it before dispatching arms (moved plant, SPV, wrong entity). Other
+   candidates at the same address (e.g. a sister company's own listing) go to the group map.
+2. **Phone + website from Maps:** a website here goes straight into the D4 domain check (the qlt.com.my lesson).
+3. **Photos:** LOOK at them (≤3 per Read) — signage, certificates, co-located companies, plant type. Real-plant photos feed the
+   first-visit deck; credit "Google Maps" + author. Never use them as stock imagery for another company.
+4. **Reviews:** rating, count and up to 5 review texts → `## Community & Sentiment` (【公開-社群】, sentiment-grade); hand them to D5.
+5. **Neighbourhood (3 km):** nearest factories / estates (estate context, peers, future suspects) and our own DB companies within 15 km
+   (→ `## Warm Base`, warm-base naming rules apply: live deals never named).
+`NOT FOUND on Google Maps` is a finding (below-radar or wrong name) — try the Thai legal name, then the brand, before writing it.
+Places data is public Google Maps data: never claim more than it shows; photos carry no date.
+
+**Lead lists (separate command, on demand — not part of a company run):** `python3 tools/maps/places.py prospect --query "<trade, EN>" --query "<trade, TH>" (--province <th> | --near "<place>" --radius-km 15)` → CSV in `docs/lead-lists/`, cross-checked against our DB (`in_db`), closed places dropped, each row classed `prospect (maker)` / `supplier/referral (dealer)` / `check` per the inbox rules, every row marked "DBD check before contact" (Maps cannot see owner nationality — Thai-local mandate). Built for Fusion Advantec 2026-11-03; nothing is sent to a partner without Peter.
 
 ## Step 2.5: Warm-Base Cross-Reference (main loop — read-only local MySQL)
 
@@ -399,7 +435,7 @@ We already know 157+ companies. Cross-reference the target against our own base 
 3. **Group overlap:** `related_entities` + any TIPTOP-family entities.
 
 Output → `## Warm Base & Nearby References` (3–5 lines, each tagged 【DB】), INSIDE the INTERNAL fence:
-- **Live pipeline deals are NEVER named** (deals live in the Google Sheet, not here): write "an active opportunity in the same estate — ask Peter", never the company name.
+- **Live pipeline deals are never named** (deals live in the Google Sheet, not here): write "an active opportunity in the same estate — ask Peter", never the company name.
 - Signed customers may be named ONLY if reference-approved; otherwise "a DigiWin client 2km away (reference approval TBC)".
 - Tag every hit `direct|distributor` — never blend the two books.
 - MySQL down → write `> Warm base: DB unavailable — skipped` and continue (never fail the run).
@@ -410,9 +446,9 @@ Output → `## Warm Base & Nearby References` (3–5 lines, each tagged 【DB】
 python3 tools/reference_sweep.py <company-id> --terms "<industry terms: zh, zh-simplified, en — e.g. 不織布,不织布,熔噴,紡粘,nonwoven,spunbond>"
 ```
 
-**Why:** a 2026-09 nonwoven research run searched only MySQL and the Monk slide corpus, wrote "genuine white space — no nonwoven
+**Why:** the Narula run searched only MySQL and the Monk slide corpus, wrote "genuine white space — no nonwoven
 anywhere", and the deck told the customer "we have not done a nonwoven plant". DigiWin TW's published case library,
-mirrored locally, held THREE nonwoven manufacturers (three nonwoven manufacturers) and the Monk had one of them on a logo wall.
+mirrored locally, held THREE nonwoven manufacturers (勝宏實業, 南六企業, 耀億工業) and the Monk had 耀億 on a logo wall.
 Two negative sources are not absence. The sweep searches the TW cases, blog and solution pages, the Monk cards (by
 industry term AND by every case company's name), and the RAG, and writes
 `docs/research-fragments/<id>/reference-sweep.md` ending in `SWEEP-VERDICT: FOUND n | NONE | INCOMPLETE`.
@@ -432,10 +468,11 @@ industry term AND by every case company's name), and the RAG, and writes
 
 Based on URLs found in Step 2, fetch the most valuable pages:
 
-1. **Company website — MANDATORY DEEP CRAWL (2–3 levels, not just the homepage).** The website is where most of the real intel lives — and a homepage-only skim repeatedly misses the most decision-relevant facts (Peter, 2026-06-30). The discipline:
+1. **Company website — mandatory DEEP CRAWL (2–3 levels, not just the homepage).** The website is where most of the real intel lives — and a homepage-only skim repeatedly misses the most decision-relevant facts (Peter, 2026-06-30). The discipline:
    - **a. Map the site first.** WebFetch the homepage AND ask it to return *every* nav link / page URL (about, products, **solutions/services**, capabilities, certifications, news/blog, careers, contact, sustainability, group/subsidiaries). Real sites hide detail under `/product-services/<x>`, `/solutions/<x>` sub-paths — find them.
    - **b. Drill EVERY solution/product/service page individually** — not the menu label, the actual page. For a multi-solution company, fetch each solution's own page. (PLIC burn 2026-06-30: I read the warehouse menu but not the pages — missed that their construction arm **builds factories**, and that their "WMS" is generic/not a real product. Both were on the site, 2 clicks deep.)
    - **c. Also crawl: /about (history, milestones, leadership names, JV/parent), /news (expansion, new plant, automation/ERP, awards, ESG = timing triggers), /contact (all phones/emails/branches), and any group/subsidiary pages (each legal entity).**
+   - **c2. Enumerate, don't sample; look at the images (AIERFU burn 2026-10-27).** If the CMS numbers pages (`?c=category&id=` / `?c=show&id=` / `/product/123`), probe the whole id range in every language tree and inventory the real pages; parse every product page. View certificate walls, logo walls and factory photos (contact sheets): company names on certificates, exchange listings and machine brands live only in images. A website arm that returns PARTIAL is finished by the orchestrator before promotion, never accepted as-is.
    - **d. Verify per page + quote verbatim.** Trace every claim to the page that said it; correct earlier assumptions against what the page actually states (Win Chance burn 2026-06-30: "OEM with Heinz client" was actually an **ex-Heinz JV + exclusive Heinz APAC co-packer** — only the /about page revealed it).
    - Extract: full product/solution catalog, certifications (ISO/IATF/GMP/BRC/HACCP…), factory/plant list & capacity, management/leadership names, group structure, partner/distributor brands, export markets, contact details.
    - **ALSO**: verify the correct registered company name (NutritionProfess lesson — website revealed the correct spelling when pipeline had it wrong).
@@ -451,9 +488,9 @@ Deep-tier sections that a quick run does not produce get blockquote placeholders
 
 ## Step 3D: DEEP tier — parallel research fan-out
 
-After Step 2/2.5 (DBD + warm base stay in the main loop), dispatch **4 parallel research agents in ONE message** (Agent tool, `model: sonnet` each — tier-disciplined per docs/model-tier-harness.md; log all dispatches to `docs/token-ledger.csv`). Every agent prompt carries a 4-part spec (outcome · quality bar · inputs · guardrails) and this fragment contract:
+After Step 2/2.5 (DBD + warm base stay in the main loop), **write `docs/research-fragments/<company-id>/00-context.md`** (every DBD fact + public fact so far) and, for a foreign-owned target, **identify the parent in the main loop first per `china-sources.md`** — arms have no browser and cannot reach Chinese sources. Then dispatch the research agents **ONE AT A TIME, in order D1 → D2 → D3 → D4 → D5** (Peter's standing rule, `batch-mode.md` invariant ②; the old "all in ONE message" wording is retired). Between arms, append what the main loop learned to `00-context.md`; every arm prompt says "read 00-context.md first". Agents are `model: sonnet` each — tier-disciplined per docs/model-tier-harness.md; log all dispatches to `docs/token-ledger.csv`). Every agent prompt carries a 4-part spec (outcome · quality bar · inputs · guardrails) and this fragment contract:
 
-**Fragment contract (all agents):** write your full findings to `docs/research-fragments/<company-id>/d<N>-<topic>.md` (≤500 lines; every line source-attributable; the file starts with the INTERNAL banner). Return to the orchestrator only a ≤15-line summary: counts, headline findings, confidence. **The file MUST end with `STATUS: OK | PARTIAL | FAILED` plus the list of searches actually run.** A missing fragment file ≡ FAILED. On FAILED: orchestrator retries once; still failing → the corresponding dossier section carries a visible `MODULE FAILED (D<N>) — rerun --deep` banner and the matching gate FAILS (a crash is never recorded as "no signal"). **Cutoff: at 75 minutes total run time, ship PARTIAL with banners rather than looping.**
+**Fragment contract (all agents):** write your full findings to `docs/research-fragments/<company-id>/d<N>-<topic>.md` (≤500 lines; every line source-attributable; the file starts with the INTERNAL banner). Return to the orchestrator only a ≤15-line summary: counts, headline findings, confidence. **The file must end with `STATUS: OK | PARTIAL | FAILED` plus the list of searches actually run.** A missing fragment file ≡ FAILED. On FAILED: orchestrator retries once; still failing → the corresponding dossier section carries a visible `MODULE FAILED (D<N>) — rerun --deep` banner and the matching gate FAILS (a crash is never recorded as "no signal"). **Cutoff: at 75 minutes total run time, ship PARTIAL with banners rather than looping.**
 
 - **Agent D1 — ERP incumbent & IT footprint (evidence collection only).** **FIRST ACTION, before any
   press/vendor/LinkedIn sweep: find the company's OWN employer page on JobThai (`jobthai.com/th/company/<id>`,
@@ -467,9 +504,9 @@ After Step 2/2.5 (DBD + warm base stay in the main loop), dispatch **4 parallel 
   ~100 SKUs/day, 10+ changeovers/day.) Postings also reveal **intent**: an IoT/OT or AI hire alongside the
   ERP role means 自建情結 — they plan to build it themselves, which changes positioning from sell-to-gap to
   sell-the-standard-data-base. Then sweep: Thai job boards (JobThai/JobsDB + `สมัครงาน IT / เจ้าหน้าที่ ERP / ผู้ดูแลระบบ`), LinkedIn snippets, FB careers posts, website tech clues (careers pages, screenshots, news), SI/accounting-firm relationships (Thai SMEs often buy what their firm carries), and **active-evaluation signals** (`"[company]" ERP implementation / โครงการ ERP / go-live`, vendor case studies naming the company → record as row type `evaluation-in-progress`). Check every hit against the §15 name pack. **Every evidence line carries a DATE; evidence >24 months old → confidence auto-Low + generate a discovery question ("confirm current system — signal is stale").** Output fragment = candidate rows for `## Technology & Systems` (only named systems w/ evidence + confidence) + raw material for the verdict (see contract rule 3 — verdict itself is written by the orchestrator as prose in `## ERP Incumbent Read 【推論】`, **four states**: `displacement / greenfield / recently-purchased-or-implementing (→ complement play: eMES/WMS) / in-family TIPTOP (→ upgrade-expansion play)`).
-- **Agent D2 — decision-maker & group map (raw evidence only; PASSIVE OSINT).** Per-director cross-holding searches (DBD/creden/dataforthai), shared-address hits, DBD related-companies listings, succession signals (2nd-gen roles on /about, news, FB), key-people public presence. **Guardrails: passive lookups only — no LINE adds, no FB follows, no connection requests; LinkedIn snippets only; family members recorded by ROLE relevance only ("2nd-gen Managing Director per /about"), never minors, never personal-life detail; every people-claim carries its public source URL.** The ORCHESTRATOR (top tier) builds the group tree + 守門員/決策者/核決者 hypothesis from the raw hits: a sister-entity claim requires **≥2 independent signals** (shared director AND shared address, or an explicit DBD related-companies listing); a single name match stays "possible, unverified". The role hypothesis NEVER lifts 三角色決策 above `inferred`.
+- **Agent D2 — decision-maker & group map (raw evidence only; PASSIVE OSINT).** Per-director cross-holding searches (DBD/creden/dataforthai), shared-address hits, DBD related-companies listings, succession signals (2nd-gen roles on /about, news, FB), key-people public presence. **Guardrails: passive lookups only — no LINE adds, no FB follows, no connection requests; LinkedIn snippets only; family members recorded by ROLE relevance only ("2nd-gen Managing Director per /about"), never minors, never personal-life detail; every people-claim carries its public source URL.** The ORCHESTRATOR (top tier) builds the group tree + 守門員/決策者/核決者 hypothesis from the raw hits: a sister-entity claim requires **≥2 independent signals** (shared director AND shared address, or an explicit DBD related-companies listing); a single name match stays "possible, unverified". The role hypothesis never lifts 三角色決策 above `inferred`.
 - **Agent D3 — money & urgency.** Build the dated trigger timeline (see §16 taxonomy): new factory/land purchase, BOI approvals, expansion/hiring surges, IPO/แปรสภาพ, **System EOL** (write "System EOL — …", never "ERP" leading a cell), e-Tax/CBAM regulation, relocation — every item DATED + source-tagged. From the DBD ratios already extracted: draft 2–4 **pain-in-฿ candidates as validating QUESTIONS** (Nova pain-translation form) with explicit-assumption RANGES — "IF inventory error is even 1% of COGS → ฿X–Y/yr — worth checking?" — each figure names its assumption; never a declarative loss claim. KSF3 output = arithmetic flag (`pain candidate clears / does not clear ฿1M THB`), never a score. Plus a 3-line **budget-capacity read** 【推論 from DBD】 (capital events, equity/cash one-liner, tier-affordability hypothesis).
-- **Agent D4 — website deep crawl.** Same Gate-#8 discipline as Step 3 (map → drill every page → verify + quote verbatim, ≤10 verbatim lines per page), written to the fragment file.
+- **Agent D4 — website deep crawl.** Same Gate-#8 discipline as Step 3 (map → drill every page → verify + quote verbatim, ≤10 verbatim lines per page), written to the fragment file. **"No website" may only be written after a DIRECT domain check** (added 2026-11-02, the QLT burn: ten arm runs reported "no website" from searches alone while the parent's site qlt.com.my was live and listed the Thai address): the main loop runs `dig +short` + `curl -L` on ≥10 candidates built from the name (brand.com / .com.my / .co.th / .com.sg / .com.vn / brand+precision / brand+group / brand+thailand / the card's e-mail domain) BEFORE dispatching D4, and passes every live domain to D4. A WordPress site's full page list is at `/wp-json/wp/v2/pages?per_page=100`. **No Thai website → crawl the parent's.** **Dead site (e.g. HTTP 416 to curl AND Chrome) → crawl the Wayback Machine** via the CDX API (`china-sources.md`), newest snapshot per page, and say in the dossier that the evidence is archived with its snapshot date. D4 also saves the visual assets (logo, plant, products) and labels parent assets as the parent's, never as the Thai plant's.
 - **Agent D5 — community & sentiment sweep (added 2026-07-18 per Peter).** The Thai-local voice: Pantip/forum threads, Facebook page + public group mentions, Google Maps reviews (agent tries search-snippet + proxy routes; if blocked, the ORCHESTRATOR pulls Maps via main-loop Playwright and appends to the fragment), employer reviews (JobsDB/JobThai/งานดีมั้ย), TikTok/YouTube mentions, LINE OA presence, and the Thai negative-news pack (ฟ้อง/คดี/โกง/ค้างจ่าย/ประท้วง/ไฟไหม้/เลิกจ้าง/แรงงาน). Fragment: `d5-community-sentiment.md`. Everything tagged **【公開-社群】= sentiment-grade, never fact-grade** — quote verbatim with URL + date, phrase claims as "reviewers allege/say", separate B2C consumer voice from B2B service chatter from employee voice. Guardrails: PASSIVE only — no login/posting/joining/contacting, no minors or private-person detail; defamatory material never leaves internal fences. Absence is a finding ("no local footprint" ≈ B2B-only or below-radar — say which).
 
 **Synthesis (orchestrator, top tier):** read fragments ONE FILE AT A TIME; contradiction-check every fragment claim against DBD; merge into the dossier per the OUTPUT CONTRACT; **then run the SELF-CONSISTENCY PASS before the gates.**
@@ -489,14 +526,14 @@ Then gates. Fragment retention: after the dossier passes gates, delete fragments
 
 ## Step 4: Self-Reflection
 
-**CRITICAL: Do not skip this step. This is what separates good research from lazy research.**
+**Critical: Do not skip this step. This is what separates good research from lazy research.**
 
 Before generating the briefing, pause and systematically check your work:
 
 ### Coverage Check
 For each category, write what you found or "NOT FOUND":
-- **DBD DataWarehouse data (CRITICAL)**: Tax ID, registration date, capital, directors, status, TSIC code, business size: ___
-- **DBD Financial data (CRITICAL)**: 5-year revenue, profit, assets, debt, inventory, equity: ___
+- **DBD DataWarehouse data (critical)**: Tax ID, registration date, capital, directors, status, TSIC code, business size: ___
+- **DBD Financial data (critical)**: 5-year revenue, profit, assets, debt, inventory, equity: ___
 - Company basics (name EN/TH, founding year, address, website): ___
 - What they manufacture (products, processes): ___
 - Factory locations and size: ___
@@ -510,7 +547,7 @@ For each category, write what you found or "NOT FOUND":
 - Certifications (ISO, IATF, GMP): ___
 - Related companies (from DBD search results): ___
 
-**If DBD data is missing, this is a CRITICAL gap. Try harder before proceeding.**
+**If DBD data is missing, this is a critical gap. Try harder before proceeding.**
 
 ### Anomaly Check
 - Is this entity an **SPV/holding company**? (zero revenue + zero inventory + zero PP&E)
@@ -530,13 +567,13 @@ For EACH category marked "NOT FOUND" or weak:
 - Compare data across sources. Do any conflict?
   (e.g., website says 500 employees but LinkedIn snippet says 50)
 - If contradictions exist: note both values, flag the lower-confidence source, explain the discrepancy.
-- **Revenue estimates from non-DBD sources (ExportHub, Growjo, etc.) are often wildly wrong** — BFC showed $5-10M on ExportHub but actual DBD revenue was $58M (2.05B THB). ALWAYS trust DBD over third-party estimates.
+- **Revenue estimates from non-DBD sources (ExportHub, Growjo, etc.) are often wildly wrong** — BFC showed $5-10M on ExportHub but actual DBD revenue was $58M (2.05B THB). Always trust DBD over third-party estimates.
 
 ### Evidence Audit
-- Every claim MUST have a source (URL or search query that found it) — tag lines 【DBD】/【公開】/【推論】/【電話】/【DB】.
+- Every claim must have a source (URL or search query that found it) — tag lines 【DBD】/【公開】/【推論】/【電話】/【DB】.
 - Any "facts" that are actually your assumptions? Downgrade confidence to "Estimated" and tag 【推論】.
 - Every 【推論】 in a sales section must NAME the facts it derives from.
-- Ownership type MUST cite director names or parent company evidence — never guess without evidence.
+- Ownership type must cite director names or parent company evidence — never guess without evidence.
 
 ### Completeness Score
 Count how many of the 12 categories have data: X/12.
@@ -544,7 +581,7 @@ If below 6/12: you likely need more searches. Try harder before proceeding.
 
 ## Step 5: Generate Briefing
 
-**NOVA calibration + LIVE consultation + gap capture (both tiers):** before writing the sales sections, read `nova-knowledge.md` and apply its priors (wedge choice, incumbent hypothesis, ROI ranges, qualification gates/red flags, trigger weights, authority playbook) — always inside internal fences, always tagged. **Then, whenever an inference cannot be grounded in either run evidence or the cached KB, ASK THE LIVE NOVA AGENT (do not guess, do not merely queue).** Follow `nova-live-consultation.md`: open the Playwright/Teams driver, `+ 新對話` in 南高-商機助手, send a self-contained question (ASCII hyphen only — em-dash triggers the WAF 403), capture the answer verbatim via the job API to `docs/research-fragments/<company-id>/nova-live-<date>.md`, tag reliance 【NOVA live <date>】 inside internal fences. Bias toward asking: Peter's rule is "ask whenever, ask where you need to, so you are undoubtedly confident." Encode durable, generalizable answers back into `nova-knowledge.md` (new §N). If the live agent is unreachable, fall back: append the GENERALIZED question to `docs/nova-queue.md` and note it. Footer line: `NOVA live consulted: N (<topics>) · KB updated: §N|none · queued: N`.
+**NOVA calibration + LIVE consultation + gap capture (both tiers):** before writing the sales sections, read `nova-knowledge.md` and apply its priors (wedge choice, incumbent hypothesis, ROI ranges, qualification gates/red flags, trigger weights, authority playbook) — always inside internal fences, always tagged. **Then, whenever an inference cannot be grounded in either run evidence or the cached KB, ASK THE LIVE NOVA AGENT (do not guess, do not merely queue).** Follow `nova-live-consultation.md`: open the Playwright/Teams driver, `+ 新對話` in 南高-商機助手, send a self-contained question (ASCII hyphen only — em-dash triggers the WAF 403), capture the answer verbatim via the job API to `docs/research-fragments/<company-id>/nova-live-<date>.md`, tag reliance 【NOVA live <date>】 inside internal fences. Bias toward asking: Peter's rule is "ask whenever, ask where you need to, so you are undoubtedly confident." Encode durable, generalizable answers back into `nova-knowledge.md` (new §N). If the live agent is unreachable, fall back: append the GENERALIZED question to `docs/nova-queue.md` and note it. Footer line: `NOVA live consulted: N (<topics>) · KB updated: §N|none · queued: N`. **Then fill `## NOVA Judgment Ledger`** (deep tier, placed before the Reflection Summary): one row per item key in `nova-live-consultation.md` — every item must be ASKED with a job id before promotion; the gates check it.
 
 Output the briefing using the template in `briefing-template.md` (A operating / B greenfield / C SPV-unresolved). Distributor/SI/co-sell candidates → **`/research-partner`** (Template D retired 2026-07-17).
 
@@ -598,7 +635,7 @@ Use the authoritative mapping table in `extraction-schema.md` (Section 13). Appl
 ### Ownership Type Detection
 Use director names and company structure as evidence:
 - Thai surnames (สมชาย, พิสุทธิ์) → Thai-owned. Pitch: respect hierarchy, find real 核決者
-- Chinese surnames (張, 李, 王, 陳) → likely 台商 or 陸商. Pitch: Mandarin, reference Taiwan HQ
+- Chinese surnames (張, 李, 王, 陳) → likely 台商 or 陸商. Pitch: Mandarin, reference Taiwan HQ. **100% foreign-held → off Peter's Thai-local mandate: flag it at the top of the 60-second read and ask NOVA live who owns the lead (`china-sources.md` § Mandate flag).**
 - Japanese names (田中, 鈴木) → Japanese JV. Pitch: quality/traceability emphasis
 - Western names or multinational parent → MNC subsidiary. Pitch: cost vs global suites
 - **American-registered but Chinese directors** → US holding company for Chinese group (Zhongli pattern). Pitch: Mandarin + international standards
@@ -611,7 +648,7 @@ The most common "competitor" for Thai SMEs is NOT a global suite — it's **Exce
 
 ## Step 6: QA Checklist (MANDATORY — do NOT skip)
 
-**Run QA on the DRAFT (in `docs/_eval/`) BEFORE promoting.** Every gold standard MUST pass before it reaches `docs/`. Batch processing is NO excuse for quality drops.
+**Run QA on the DRAFT (in `docs/_eval/`) BEFORE promoting.** Every gold standard must pass before it reaches `docs/`. Batch processing is NO excuse for quality drops.
 
 ### Mechanical check (REQUIRED — run both commands)
 ```bash
@@ -660,6 +697,9 @@ Verify the output contains ALL of these sections (mark ✅ or ❌):
 12. ❌ **Source-tag audit**: any row of the two NEW tables untagged, or a 【推論】 that doesn't name its source facts (spot-check 5 claims elsewhere) → FAIL.
 13. ❌ **Ingest dry-run contract** (above) not green → FAIL / INCONCLUSIVE (MySQL down) → no promote.
 14. ❌ **INTERNAL fences ≠ 6** on a deep dossier (① 60s read ② incumbent read ③ decision map ④ pain-in-฿ ⑤ budget capacity ⑥ warm base) → FAIL.
+15. ❌ (deep) **NOVA Judgment Ledger incomplete** → FAIL. `## NOVA Judgment Ledger` lists the 10 items of `nova-live-consultation.md` (product-fit, wedge-stage, competitive, objections, authority-family, lead-ownership, proof-points, pain-amounts, visit-questions, residual), each `ASKED` + NOVA job id, or an allowed `N/A — reason`. Enforced by `check_contract.py --deep` and depth-gate AC5 (job ids must exist in a capture). Never decide a ledger item yourself because it "looks settled" (QLT 2026-11-03).
+16. ❌ (deep) **Industry brief not cited** → FAIL. Check `docs/industry-briefs/INDEX.md` FIRST; reuse a brief under 6 months old (add the company to its INDEX row) or run the NotebookLM sweep (`industry-sweep.md`); the dossier cites `docs/industry-briefs/<slug>.md`. Enforced by `check_contract.py --deep` (`industry-brief-cited`). If NotebookLM is not signed in on this machine (`nlm login profile list` → none), say so and ask Peter to run `! nlm login` — never silently skip (QLT 2026-11-03).
+17. ❌ **Site & Map Check missing** → FAIL (dossiers generated from 2026-11-02). `## Site & Map Check` from `tools/maps/places.py check` (Step 2.3), carrying a Google place ID or the literal line `NOT FOUND on Google Maps`. Enforced by `check_contract.py` (`site-map-check`).
 
 ### Special Cases
 - **DISQUALIFIED companies**: Still need Fit Assessment table with clear "DISQUALIFIED" + reason. Must be scannable within 5 seconds. Discovery Priorities and Sales Angles are N/A.
@@ -675,7 +715,7 @@ Verify the output contains ALL of these sections (mark ✅ or ❌):
 **Never write a glob-matching filename before gates pass** (the nightly launchd job auto-commits every `docs/gold-standard-*.md` to MySQL at 02:00, gated or not).
 
 1. Draft lives at `docs/_eval/gold-standard-<id>.md.draft` throughout Steps 5–6.
-2. All gates green → if `docs/gold-standard-<id>.md` already exists, back it up to `docs/_eval/archive/gold-standard-<id>-<date>.md.bkp` (NEVER a glob-matching name).
+2. All gates green → if `docs/gold-standard-<id>.md` already exists, back it up to `docs/_eval/archive/gold-standard-<id>-<date>.md.bkp` (never a glob-matching name).
 3. `mv docs/_eval/gold-standard-<id>.md.draft docs/gold-standard-<id>.md`
 4. Clean/archive fragments (deep tier).
 5. Print the footer next-actions block:
@@ -708,7 +748,7 @@ company that already has a promoted gold standard. Run within 48h of the meeting
 5. **Discovery Priorities** — mark ANSWERED items (keep them, labeled, at the bottom); promote the next
    evidence asks to the top.
 6. **Key Sales Angles + 60-second read** — resequence to the post-meeting play.
-**NEVER touch:** DBD-owned data (capital/TSIC/financials — the DBD refresh owns those), the original OSINT
+**Never touch:** DBD-owned data (capital/TSIC/financials — the DBD refresh owns those), the original OSINT
 evidence trail, or anything the meeting did not actually evidence.
 
 **NOVA rule:** any STRATEGY flip implied by the meeting (entry play, stage grading, wedge) goes to the LIVE
@@ -724,7 +764,7 @@ NOVA job 66a5b3a4: C2→C1 regrade, CFO-first retired, Trojan-horse escalation s
 
 ## Step 8: Batch Processing Protocol
 
-**BATCH-MODE CONTRACT (MANDATORY — read `batch-mode.md` in this skill's directory before ANY multi-company or unattended/overnight run).** The 5 invariants, in one line each: ① batch never changes the per-company protocol — `--deep` always means full D1→D2→D3→D4→D5 + fresh NOVA, no compressed/combined agents; ② agents strictly sequential, one alive at a time (Peter's standing rule); ③ depth beats coverage — fewer companies at full depth, never all at reduced depth (queue the rest, list the queue in the report); ④ <25 min/company = defect signal, stop and audit; ⑤ report per-company wall-clock + dispatch mode + any deviation proactively. **Before promoting each company: `python3 ~/.claude/skills/digiwin-research-company/scripts/batch_depth_gate.py <company-id>`** (asserts 4 fragments with STATUS + search logs, sequential mtimes, NOVA capture) — depth-gate FAIL = no promote. Origin: the 2026-07-17 overnight compression burn (all 5 upgraded dossiers had missed decision-changing facts).
+**BATCH-MODE CONTRACT (mandatory — read `batch-mode.md` in this skill's directory before ANY multi-company or unattended/overnight run).** The 5 invariants, in one line each: ① batch never changes the per-company protocol — `--deep` always means full D1→D2→D3→D4→D5 + fresh NOVA, no compressed/combined agents; ② agents strictly sequential, one alive at a time (Peter's standing rule); ③ depth beats coverage — fewer companies at full depth, never all at reduced depth (queue the rest, list the queue in the report); ④ <25 min/company = defect signal, stop and audit; ⑤ report per-company wall-clock + dispatch mode + any deviation proactively. **Before promoting each company: `python3 ~/.claude/skills/digiwin-research-company/scripts/batch_depth_gate.py <company-id>`** (asserts 4 fragments with STATUS + search logs, sequential mtimes, NOVA capture) — depth-gate FAIL = no promote. Origin: the 2026-07-17 overnight compression burn (all 5 upgraded dossiers had missed decision-changing facts).
 
 When processing multiple companies in a session:
 
@@ -742,7 +782,7 @@ Research companies in this order:
 - **Playwright session**: Restart the browser every 3 companies to avoid stale sessions
 
 ### Quality Rule
-- Each company MUST independently pass the QA checklist (Step 6)
+- Each company must independently pass the QA checklist (Step 6)
 - Quality of company N must equal quality of company 1 — no degradation allowed
 - If DBD data is unavailable (529 error, site bugs), note it explicitly and use fallback sources
 - If a file cannot pass QA due to missing data, mark it as "INCOMPLETE — needs retry" with specific gaps listed

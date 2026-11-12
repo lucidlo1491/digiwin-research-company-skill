@@ -5,10 +5,10 @@ claims "we have no reference for X".
 
     python3 tools/reference_sweep.py <company-id> --terms "不織布,熔噴,紡粘,nonwoven,spunbond"
 
-WHY (Peter, 2026-09-24): the research searched only the OSINT DB and the Monk slide corpus, concluded
+WHY (Peter, 2026-09-24, Narula): the research searched only the OSINT DB and the Monk slide corpus, concluded
 "genuine white space: no nonwoven anywhere", and the deck said "we have not done a nonwoven plant". DigiWin TW's
-own case library (mirrored locally since July) held three nonwoven manufacturers — three of them —
-and the Monk had one of them on a logo wall. Two negative sources do not prove absence. This sweep searches ALL of them.
+own case library (mirrored locally since July) held three nonwoven manufacturers — 勝宏實業, 南六企業, 耀億工業 —
+and the Monk had 耀億 on a logo wall. Two negative sources do not prove absence. This sweep searches ALL of them.
 
 Sources (each reports FOUND / none / ERROR — an ERROR source means the verdict can never be NONE):
   1 tw-case   DigiWin TW published cases       docs/digiwin-tw-mirror/_internal/case/*/article.source.zh.md
@@ -39,7 +39,7 @@ RAG_PY = "/opt/homebrew/Caskroom/miniconda/base/bin/python3"   # the interpreter
 
 def _body(text):
     """Drop the site chrome that pollutes every mirrored page: menu bullets, image links, prev/next footer, and the
-    "更多案例" sidebar (other cases' titles — counting those made names 'appear' in unrelated cases)."""
+    "更多案例" sidebar (other cases' titles — counting those made 耀億/南六 'appear' in unrelated cases)."""
     text = text.split("更多案例")[0]
     out = []
     for line in text.splitlines():
@@ -79,12 +79,21 @@ def sweep_markdown(pattern, terms, kind):
     return hits, n
 
 
+def _dsc_text(raw):
+    """Page text WITHOUT the site chrome. 334 of 346 mirrored solution pages carry the full industry menu
+    (太陽能光電業, 物流, 機械設備業, 系統整合 …) in <header>/<nav>/<footer>, so before 2026-09-28 any industry term
+    'matched' nearly every page. Drop header/nav/footer/script/style; keep the rest (some pages hold real content
+    outside <main>, so restricting to <main> lost text without removing any more noise)."""
+    raw = re.sub(r"<(script|style|header|nav|footer)\b[^>]*>.*?</\1>", " ", raw, flags=re.S | re.I)
+    return re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", raw))
+
+
 def sweep_dsc(terms):
     hits, n = [], 0
     for f in sorted(glob.glob(str(MIRROR / "dsc" / "**" / "*.html"), recursive=True)):
         n += 1
         raw = open(f, encoding="utf-8", errors="ignore").read()
-        text = re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", re.sub(r"<(script|style)[^>]*>.*?</\1>", " ", raw, flags=re.S)))
+        text = _dsc_text(raw)
         found = [t for t in terms if t.lower() in text.lower()]
         if found:
             title = re.search(r"<title>(.*?)</title>", raw, re.S)
@@ -154,7 +163,7 @@ def main():
             rows += h; sources.append(f"rag={len(h)}/12")
 
     # NAME PASS: the Monk records company NAMES (logo walls, reference lists) without their industry, so an industry
-    # term never finds them (one sat on a customer logo wall). Search every case company found above by name.
+    # term never finds them (耀億 sat on a 美吾華 logo wall). Search every case company found above by name.
     names = sorted({r["company"] for r in rows if r["source"] == "tw-case" and len(r["company"]) >= 3})
     by_name = 0
     for f in sorted(CARDS.glob("*.md")):
@@ -184,8 +193,18 @@ def main():
         L += ["## Other mentions (blog, solution pages, Monk cards, RAG)", "", "| Source | Item | Terms | Context |", "|---|---|---|---|"]
         L += [f"| {r['source']} | {r['title'][:50]} | {', '.join(r['terms'])} | {r['context'][:120]} |" for r in other]
         L.append("")
+    # TERM BREADTH (2026-09-28): a case counts if ANY term appears, so one generic word (系統整合, 物流, 機械設備)
+    # pulls in hundreds of unrelated cases. Report each term's case hits; > BROAD_AT flags it for narrowing.
+    BROAD_AT = 20
+    per_term = {t: sum(1 for r in cases if t in r["terms"]) for t in terms}
+    broad = [t for t, n in per_term.items() if n > BROAD_AT]
+    L += ["## Term breadth (published cases per term)", "",
+          " · ".join(f"{t}={n}" for t, n in per_term.items()), ""]
+    if broad:
+        L += [f"> BROAD TERMS (> {BROAD_AT} cases each): {', '.join(broad)} — likely not his industry; rerun without them.", ""]
     L += [f"SWEEP-VERDICT: {verdict}", f"SOURCES: {' · '.join(sources)}", ""]
     out.write_text("\n".join(L), encoding="utf-8")
+    if broad: print(f"BROAD TERMS: {', '.join(broad)}")
     print("\n".join(L[-3:])); print(f"wrote {os.path.relpath(out, REPO)}  ({len(cases)} published cases)")
 
 

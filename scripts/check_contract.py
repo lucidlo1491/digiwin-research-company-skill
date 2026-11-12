@@ -147,6 +147,79 @@ def main():
     else:
         check("internal-fence-present", fences >= 1, f"found {fences}, need ≥1 (60-second read)")
 
+    # ---- NOVA judgment ledger (deep; added 2026-11-03, the QLT burn) ------------
+    # Every judgment call nova-live-consultation.md names must be ASKED of live
+    # NOVA (job id) or carry an allowed N/A with a reason. On QLT three of them
+    # (lead ownership for a 100%-foreign target, proof-point choice, pain-฿
+    # assumptions + visit-question wording) were decided by Claude alone and the
+    # dossier still passed every gate.
+    gen = re.search(r"(?m)^>.*Generated:\s*(\d{4}-\d{2}-\d{2})", src)
+    ledger_required = deep and (not gen or gen.group(1) >= "2026-11-02")
+    if deep and not ledger_required:
+        print("NOTE  nova-judgment-ledger not required (dossier generated before 2026-11-02)")
+    if ledger_required:
+        LEDGER_ITEMS = ["product-fit", "wedge-stage", "competitive", "objections",
+                        "authority-family", "lead-ownership", "proof-points",
+                        "pain-amounts", "visit-questions", "residual"]
+        NA_OK = {"competitive", "lead-ownership", "residual"}
+        m = re.search(r"(?im)^(#{2,4})\s+NOVA Judgment Ledger.*$", src)
+        ok, detail = bool(m), "section '## NOVA Judgment Ledger' missing"
+        if m:
+            lvl = len(m.group(1)); rest = src[m.end():]
+            nxt = re.search(rf"(?m)^#{{1,{lvl}}}\s+", rest)
+            body = rest[:nxt.start()] if nxt else rest
+            rows = {}
+            for ln in body.splitlines():
+                cells = [c.strip() for c in ln.strip().strip("|").split("|")] if ln.lstrip().startswith("|") else []
+                if len(cells) >= 3 and cells[0].lower() in LEDGER_ITEMS:
+                    rows[cells[0].lower()] = cells
+            foreign = bool(re.search(r"(?i)(100\s*%[^\n|]{0,40}(foreign|malaysia|china|chinese|japan|taiwan|singapore|korea|hong kong))|((foreign|malaysia|china|japan|taiwan|singapore|korea)[^\n|]{0,40}100\s*%)", src))
+            problems = []
+            for item in LEDGER_ITEMS:
+                c = rows.get(item)
+                if not c:
+                    problems.append(f"{item}: no row"); continue
+                status, job = c[1], c[2]
+                if status.upper().startswith("ASKED"):
+                    if not re.search(r"\b[0-9a-f]{8}\b", job):
+                        problems.append(f"{item}: ASKED without an 8-hex NOVA job id")
+                elif status.upper().startswith("N/A"):
+                    if item not in NA_OK:
+                        problems.append(f"{item}: N/A not allowed — must be asked")
+                    elif item == "lead-ownership" and foreign:
+                        problems.append("lead-ownership: target is ≥100% foreign-held — must be asked")
+                    elif len(re.sub(r"(?i)^n/a\W*", "", status)) < 10:
+                        problems.append(f"{item}: N/A needs a reason (≥10 chars)")
+                else:
+                    problems.append(f"{item}: status must start ASKED or N/A")
+            if problems:
+                ok, detail = False, "; ".join(problems[:4])
+        check("nova-judgment-ledger", ok, detail)
+
+    # ---- industry layer (deep; added 2026-11-03, the QLT burn) ------------------
+    # A deep dossier must cite the sub-industry brief it used (reused or newly
+    # swept) from docs/industry-briefs/. On QLT a matching 6-week-old brief
+    # existed and was never opened.
+    if ledger_required:
+        has_brief = bool(re.search(r"docs/industry-briefs/[a-z0-9-]+\.md", src))
+        check("industry-brief-cited", has_brief,
+              "no docs/industry-briefs/<slug>.md cited — reuse a brief <6 months old or run the NotebookLM sweep (industry-sweep.md)")
+
+    # ---- Site & Map Check (both tiers; added 2026-11-03) -------------------------
+    # tools/maps/places.py check output: a Google place ID or the explicit
+    # "NOT FOUND on Google Maps" line. Dossiers generated before 2026-11-02 exempt.
+    gen2 = re.search(r"(?m)^>.*Generated:\s*(\d{4}-\d{2}-\d{2})", src)
+    if not gen2 or gen2.group(1) >= "2026-11-02":
+        m = re.search(r"(?im)^##\s+Site & Map Check.*$", src)
+        ok, detail = bool(m), "section '## Site & Map Check' missing — run tools/maps/places.py check (SKILL Step 2.3)"
+        if m:
+            rest = src[m.end():]
+            nxt = re.search(r"(?m)^##\s+", rest)
+            body = rest[:nxt.start()] if nxt else rest
+            if not (re.search(r"place ID `[A-Za-z0-9_-]{20,}`", body) or "NOT FOUND on Google Maps" in body):
+                ok, detail = False, "no Google place ID and no 'NOT FOUND on Google Maps' line"
+        check("site-map-check", ok, detail)
+
     # ---- deep-only: module banners are legitimate but noted --------------------
     if deep:
         failed = re.findall(r"MODULE FAILED \(D\d\)", src)

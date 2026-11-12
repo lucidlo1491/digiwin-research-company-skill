@@ -7,6 +7,7 @@ Checks that a deep run actually ran at full depth BEFORE the dossier is promoted
   AC1  four fragment files d1-*.md .. d4-*.md exist
   AC2  each ends with STATUS: OK|PARTIAL|FAILED and logs >=8 searches/fetches
   AC3  fragment mtimes are sequential (d1 <= d2 <= d3 <= d4)
+  AC5  every NOVA job id in the dossier's NOVA Judgment Ledger has a capture file
   AC4  a nova-live-*.md file exists with a job id and >=800 chars of capture,
        AND postdates the newest arm fragment (the consult must see the research)
 
@@ -107,6 +108,32 @@ def main() -> int:
             failures.append(f"AC4: {os.path.basename(nova[-1])} has no capture job id")
         if len(text) < 800:
             failures.append(f"AC4: {os.path.basename(nova[-1])} capture too short ({len(text)} chars)")
+
+    # AC5 (the draft is checked first when one exists — it is what will be promoted)
+    # — every NOVA job id cited in the dossier's NOVA Judgment Ledger must
+    # exist in a capture file (added 2026-11-03). Stops a ledger row pointing at
+    # a job that was never asked.
+    dossier = next((d for d in (f"docs/_eval/gold-standard-{company_id}.md.draft",
+                                f"docs/gold-standard-{company_id}.md") if os.path.exists(d)), None)
+    if dossier:
+        dsrc = open(dossier, encoding="utf-8").read()
+        mm = re.search(r"(?im)^##\s+NOVA Judgment Ledger.*$", dsrc)
+        gen = re.search(r"(?m)^>.*Generated:\s*(\d{4}-\d{2}-\d{2})", dsrc)
+        if gen and gen.group(1) < "2026-11-02":
+            pass  # grandfathered: ledger introduced 2026-11-03
+        elif not mm:
+            failures.append("AC5: dossier has no '## NOVA Judgment Ledger'")
+        else:
+            body = dsrc[mm.end():]
+            nx = re.search(r"(?m)^##\s+", body)
+            body = body[:nx.start()] if nx else body
+            cited = set(re.findall(r"\b([0-9a-f]{8})\b", body))
+            captured = set()
+            for f in nova:
+                captured |= set(re.findall(r"job\s+([0-9a-f]{8})", open(f, encoding="utf-8").read(), re.I))
+            missing = sorted(cited - captured)
+            if missing:
+                failures.append(f"AC5: ledger cites NOVA job(s) with no capture file: {', '.join(missing)}")
 
     if failures:
         for f in failures:

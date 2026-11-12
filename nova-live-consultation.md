@@ -1,7 +1,7 @@
 # Live NOVA Consultation — mandatory in-loop procedure
 
 > Canonical procedure. Referenced by `/digiwin-research-company`, `/digiwin-first-visit-deck`, and
-> `/digiwin-erp-proposal-deck`. Mandated by Peter 2026-07-17 ("ask NOVA whenever you have questions
+> `/digiwin-solution-deck`. Mandated by Peter 2026-07-17 ("ask NOVA whenever you have questions
 > about your research, ask where you need to, so you are completely, undoubtedly confident").
 > Standing authorization to query NOVA live yourself: Peter, 2026-07-15.
 
@@ -33,15 +33,48 @@ resolve by asking. Consult NOVA when you hit any of these and the cached KB does
   how to frame the complement-play or the pricing-tier reveal, 初訪七步驟 alignment, objection-preempt slides.
 - **Any residual "I'm not sure"** after synthesis. If asking would raise your confidence, ask.
 
+### The NOVA Judgment Ledger — every item is ASKED or a gate fails (added 2026-11-03)
+The list above is not advisory. A deep dossier carries `## NOVA Judgment Ledger`, one row per item below, each
+`ASKED` with the NOVA job id(s) that answered it, or `N/A — <reason>` where N/A is allowed. `check_contract.py --deep`
+(`nova-judgment-ledger`) and `batch_depth_gate.py` (AC5: every cited job id has a capture file) block promotion otherwise.
+
+| Item key | What NOVA rules on | N/A allowed? |
+|---|---|---|
+| product-fit | product, module order, T100 vs iGP for THIS structure | no |
+| wedge-stage | the pain to lead with, stage, multi-entity deal structure | no |
+| competitive | named competitor play, or what to ask about rivals | yes, with reason |
+| objections | the replies to this owner's likely objections | no |
+| authority-family | who really decides; how to work the family / reach the signers | no |
+| lead-ownership | who owns the lead (foreign-held, partner-brought, cross-team) | yes — but NEVER when the target is 100% foreign-held |
+| proof-points | which DigiWin reference cases to name, and in what order | no |
+| pain-amounts | the pain-in-฿ assumptions and ranges, and which one leads | no |
+| visit-questions | the discovery-question wording and order | no |
+| residual | any other "not sure" left after synthesis | yes, with reason |
+
+Origin: QLT (2026-11-02). Three NOVA rounds covered the big calls, but lead ownership (a 100% Malaysian-held target),
+the reference cases, the pain-฿ ranges and the question wording were decided by Claude alone. The dossier passed every
+gate, because the old gate only checked that SOME capture postdated the arms. Peter asked "did you consult NOVA for all
+of your research?" — the honest answer was no. Ask every item; record the job; the gate checks it.
+
 Batch related questions into ONE well-formed message when you can (fewer round-trips), but do not
 withhold a question just to batch it — a mid-run blocker gets asked immediately.
 
-## Access & driver (Playwright MCP)
+## Access & driver — ONE command (updated 2026-09-23)
+
+```
+/opt/homebrew/Caskroom/miniconda/base/bin/python3 tools/nova/nova_send.py --file <msg.txt> --out <capture.md> --timeout 600
+```
+Run it in the background; it sends, waits and captures in one launch (`tools/nova/NOVA-RUNBOOK.md`).
+**Never use the Chrome extension for NOVA** — it cannot see the nested frame, so the pane looks blank
+and clicks do nothing (the 2026-09-23 detour). The manual steps below are kept only as reference for
+fixing the script.
+
+## Access & driver (Playwright MCP) — manual reference
 
 The Playwright MCP persistent profile holds the Teams login. Navigation (re-derive each time; the iframe
 periodically resets to the portal home):
 
-1. App rail **鼎新數智** → **double-click** the **諾瓦Nova** tile → **業務大學姐** card → sub-assistant
+1. App rail **鼎新數智** → **single-click** the **諾瓦Nova** tile → **業務大學姐** card → sub-assistant
    list → **南高-商機助手** (Peter's daily driver).
 2. **`+ 新對話`** to open a fresh thread. **One NEW thread per company** — first line/context = the company
    name in English — to avoid cross-company contamination. (KB/methodology questions go in their own

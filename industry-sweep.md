@@ -56,6 +56,15 @@ pronouncements WITHOUT penalties or dates (綠色生產倡導 etc.); competitor 
 generic Industry-4.0 essays; vendor marketing; any specific named company's internal affairs.
 ```
 
+## Triage rule proven twice: sweep "peer cases" are usually invented
+NotebookLM deep reports end with "peer digitalization benchmarks" carrying precise before/after
+numbers (Jinjiale 2026-10-27: a Rayong foundry "scrap 11.2% → 4.3%", a Vietnam grate maker "saving
+$340,000", a Jiangsu foundry "OTIF 81% → 99.4%") with no citation, or a citation to a generic article
+that does not mention them. **No traceable primary source → DISCARD the case, do not paraphrase it.**
+Uncited cost shares, yields and "trace within N hours" claims go to a HYPOTHESIS-ONLY list (questions,
+never numbers to a customer). Write the brief in three blocks: KEEP (cited) · HYPOTHESIS ONLY ·
+DISCARD — see `docs/industry-briefs/castiron-grate-enamel-foundry.md`.
+
 ## What NOT to ask for (NOVA's 無效資訊排除清單, verbatim-grounded)
 - 宏觀產值/CAGR — boss can't collect money from a market forecast
 - 無罰則無時程的政策宣示 — no 非做不可, ignored

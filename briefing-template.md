@@ -65,6 +65,14 @@ Never use the old 6-row MEDDIC-style variant. OSINT fills ≤4/7; the rest are `
 ## Phase B+ — Deep Website Crawl
 [Products/solutions per sub-page · certifications · plants & capacity · leadership · group pages — every claim traced to its page URL (Gate #8)]
 
+## Site & Map Check   *(both tiers, from 2026-11-02 — paste the output of `tools/maps/places.py check`; gate `site-map-check`)*
+| Field | Value |
+|---|---|
+| Maps listing | <name> · place ID `<id>` · <type> |
+| Address on Maps / Registered (DBD) address / Address check | … MATCH / CHECK |
+| Status · Phone / website on Maps · Rating · Photos · Maps link | … |
+Reviews 【公開-社群】 · Neighbourhood (3 km) 【公開】 · Our DB within 15 km 【DB】 — or the single line `NOT FOUND on Google Maps`.
+
 ## What They Make
 [Products, processes, capacity, factory locations, certifications]
 
@@ -147,6 +155,20 @@ AUTHORITY CHECK: [name] — on / NOT on DBD director list; signatory = [X]; stag
 
 ## Key Sales Angles (say THESE)
 1–5, each evidence-backed.
+
+## NOVA Judgment Ledger   *(deep; required from 2026-11-02 — gate `nova-judgment-ledger` + depth AC5)*
+| Item | Status | NOVA job | Kept / overridden |
+|---|---|---|---|
+| product-fit | ASKED | <8-hex job> | ... |
+| wedge-stage | ASKED | <job> | ... |
+| competitive | ASKED or N/A — reason | <job> | ... |
+| objections | ASKED | <job> | ... |
+| authority-family | ASKED | <job> | ... |
+| lead-ownership | ASKED (never N/A when 100% foreign-held) | <job> | ... |
+| proof-points | ASKED | <job> | ... |
+| pain-amounts | ASKED | <job> | ... |
+| visit-questions | ASKED | <job> | ... |
+| residual | ASKED or N/A — reason | <job> | ... |
 
 ## Reflection Summary
 - Sources checked: [X/12] · Data gaps · Contradictions · Entity anomalies · Additional searches run · Overall confidence
