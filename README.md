@@ -65,6 +65,7 @@ Every fact in the report says where it came from. Guesses are allowed but must w
 | `briefing-template.md` | The shape of the finished report |
 | `nova-knowledge.md` | Rules of thumb learned from senior sales experts (advice, not facts) |
 | `nova-live-consultation.md` | How to ask a live expert when unsure |
+| `china-sources.md` | When the directors are Chinese or Taiwanese: how to find and prove the overseas parent company (Chinese search engines, old archived websites) |
 | `batch-mode.md`, `industry-sweep.md` | Researching many companies at once |
 | `scripts/check_contract.py`, `scripts/check_contract.sh` | The checker that gates every report |
 | `scripts/batch_depth_gate.py` | The checker for batch runs |
